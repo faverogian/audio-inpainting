@@ -84,7 +84,7 @@ gc.collect()
 
 segments = np.array(segments) #convert to numpy array (array where each entry is a vector of length "FLOATS_PER_SEGMENT")
 segments = segments.astype("float")
-normalized_data = [scale(segment) for segment in segments] #normalize by loudness
+normalized_data = [scale(segment, with_std=False) for segment in segments] #normalize by loudness
 del segments
 gc.collect()
 
