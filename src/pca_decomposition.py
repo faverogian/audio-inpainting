@@ -4,10 +4,11 @@ import numpy as np
 from sklearn.decomposition import PCA
 import joblib
 import math
-import config_env
-import spectrogram_operations
+from . import config_env, spectrogram_operations
 
-config_env.load_ini_env("environmentVars.ini")
+repo_root = os.path.abspath(os.path.join(__file__, "../.."))
+env = os.path.abspath(os.path.join(repo_root, "environmentVars.ini"))
+config_env.load_ini_env(env)
 NUM_COMPONENTS = int(os.environ.get("num_pca_components"))
 FRAME_SIZE = int(os.environ.get("frame_size")) #samples per stft
 FRAMES_PER_SEGMENT = int(os.environ.get("frames_per_segment")) #frames per segment 
@@ -15,12 +16,10 @@ FRAMES_PER_SEGMENT = int(os.environ.get("frames_per_segment")) #frames per segme
 # a segment is a time denomination, or interval, of ~50ms for best results.
 # segment duration = Frame_Size * Frames_per_Segment / Sample_Rate
 
-wd = os.getcwd()
-
 def generate_pca_bases(plot_bases=True, save_bases_as_audio=True):
     #read songs
     songlist = []
-    for root, _, files in os.walk(wd + "/Resources/"):
+    for root, _, files in os.walk(repo_root + "/Resources/"):
         for file in files:
             if file.endswith(".wav"):
                 song, _ = librosa.load(root + file)
@@ -42,7 +41,7 @@ def generate_pca_bases(plot_bases=True, save_bases_as_audio=True):
     model = PCA(n_components=NUM_COMPONENTS) #perform pca on dataset
     model.fit_transform(normalized_data)
 
-    joblib.dump(model, 'models/pca_model_nc' + str(NUM_COMPONENTS) #save model and include parameters in title
+    joblib.dump(model, repo_root + '/models/pca_model_nc' + str(NUM_COMPONENTS) #save model and include parameters in title
                 + '_fs' + str(FRAME_SIZE) 
                 + "_FPS" + str(FRAMES_PER_SEGMENT) 
                 + ".joblib")
@@ -60,5 +59,3 @@ def generate_pca_bases(plot_bases=True, save_bases_as_audio=True):
 
         if(save_bases_as_audio == True):#save pca bases as audio files
             spectrogram_operations.pca_bases_to_audio(components)
-
-generate_pca_bases()

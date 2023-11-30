@@ -1,22 +1,17 @@
 import joblib
 import numpy as np
-import spectrogram_operations
+from . import spectrogram_operations, config_env
 import os
-import config_env
 
 #STFT and basis parameterizations
-config_env.load_ini_env("environmentVars.ini")
+repo_root = os.path.abspath(os.path.join(__file__, "../.."))
+env = os.path.abspath(os.path.join(repo_root, "environmentVars.ini"))
+config_env.load_ini_env(env)
 NUM_COMPONENTS = int(os.environ.get("num_pca_components"))
 FRAME_SIZE = int(os.environ.get("frame_size"))
 FRAMES_PER_SEGMENT = int(os.environ.get("frames_per_segment"))
 SAMPLE_RATE = int(os.environ.get("sample_rate"))#audio sampling rate
 HOP_SIZE = int(FRAME_SIZE/2) #Set hop size to half the frame size (50% overlap)
-
-model = joblib.load('models/pca_model_nc' + str(NUM_COMPONENTS) #load current model
-                    + '_fs' + str(FRAME_SIZE) 
-                    + "_FPS" + str(FRAMES_PER_SEGMENT) 
-                    + ".joblib")
-components = model.components_
 
 def projection(num_components, segment_vector, bases):
     projection = np.zeros(num_components)
@@ -32,6 +27,16 @@ def linearCombination(num_components, weights, bases, average_loudness=0):
     return lc
     
 def recompose_spectrogram(song, plot_spectrogram=True):
+    try:
+        model = joblib.load(repo_root + '/models/pca_model_nc' + str(NUM_COMPONENTS) #load current model
+                            + '_fs' + str(FRAME_SIZE) 
+                            + "_FPS" + str(FRAMES_PER_SEGMENT) 
+                            + ".joblib")
+        components = model.components_
+    except:
+        FileNotFoundError("No model for current environment configuration exists")
+        return
+
     Log_power, _ = spectrogram_operations.log_power_spectrogram(song)
 
     Log_power = spectrogram_operations.truncate_spectrogram(Log_power) #truncate to be integer number of segments

@@ -3,12 +3,15 @@ import librosa.display
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-import config_env
+from . import config_env
 from sklearn.preprocessing import scale
-import spectrogram_operations
 import soundfile as sf
+import math
+import joblib
 
-config_env.load_ini_env("environmentVars.ini")
+repo_root = os.path.abspath(os.path.join(__file__, "../.."))
+env = os.path.abspath(os.path.join(repo_root, "environmentVars.ini"))
+config_env.load_ini_env(env)
 NUM_COMPONENTS = int(os.environ.get("num_pca_components"))
 FRAME_SIZE = int(os.environ.get("frame_size"))
 FRAMES_PER_SEGMENT = int(os.environ.get("frames_per_segment"))
@@ -47,7 +50,9 @@ def log_power_to_stft(Log_power):
     return S_song #this is the original stft
 
 def round_trip(song): #perform stft bring to log power, then back to time signal
-    return librosa.istft(log_power_to_stft(log_power_spectrogram(song)), hop_length=HOP_SIZE, n_fft=FRAME_SIZE)
+    log_power, phase = log_power_spectrogram(song)
+    complex_spectrogram = LogPowerPhase_to_ComplexSpectrogram(log_power, phase)
+    return librosa.istft(complex_spectrogram, hop_length=HOP_SIZE, n_fft=FRAME_SIZE)
 
 def truncate_spectrogram(spectrogram):
     # segment vectors MUST be equal length for PCA discard excess frames (will be less than 1 segment length: ~50ms)
@@ -91,7 +96,7 @@ def array_to_spectrogram_shape(arr):
 
 def LogPowerPhase_to_ComplexSpectrogram(log_power_spectrogram, phase_spectrogram):
     #combine magnitude and phase information
-    mag_spectrogram = spectrogram_operations.log_power_to_stft(log_power_spectrogram)
+    mag_spectrogram = log_power_to_stft(log_power_spectrogram)
     recover_complex_rectangular_form = np.vectorize(lambda mag, phi: complex(mag * np.cos(phi), mag * np.sin(phi)))
     reconstructed_spectrogram = recover_complex_rectangular_form(mag_spectrogram, phase_spectrogram)
     return reconstructed_spectrogram
@@ -101,7 +106,26 @@ def LogPowerPhase_to_ComplexSpectrogram(log_power_spectrogram, phase_spectrogram
 #     audio = librosa.istft(complex_spectrogram, hop_length=HOP_SIZE, n_fft=FRAME_SIZE)
 #     return audio
 
-def plot_pca_bases(num_rows, num_cols, components):
+
+def plot_pca_bases(*args):#overload function
+    if len(args) != 3:
+        try:
+            model = joblib.load(repo_root + '/models/pca_model_nc' + str(NUM_COMPONENTS) #load current model
+                            + '_fs' + str(FRAME_SIZE) 
+                            + "_FPS" + str(FRAMES_PER_SEGMENT) 
+                            + ".joblib")
+            components = model.components_
+            num_cols = math.ceil(math.sqrt(NUM_COMPONENTS)) #take square root and round up
+            num_rows = math.ceil(NUM_COMPONENTS/num_cols) #find the minimum the other factor must be
+        except:
+            FileNotFoundError("No model for current environment configuration exists")
+            return
+    
+    else:
+        num_rows = args[0]
+        num_cols = args[1]
+        components = args[2]
+
     _, axs = plt.subplots(num_rows, num_cols)
 
     for i in range(len(components)):
@@ -125,7 +149,7 @@ def plot_pca_bases(num_rows, num_cols, components):
     plt.show()
 
 def pca_bases_to_audio(components):
-    folder = "bases/pca_model_nc" + str(NUM_COMPONENTS) + "_fs" + str(FRAME_SIZE) + "_FPS" + str(FRAMES_PER_SEGMENT) +"/"
+    folder = repo_root + "/bases/pca_model_nc" + str(NUM_COMPONENTS) + "_fs" + str(FRAME_SIZE) + "_FPS" + str(FRAMES_PER_SEGMENT) +"/"
 
     if not os.path.isdir(folder):
         os.mkdir(folder)
@@ -134,7 +158,7 @@ def pca_bases_to_audio(components):
         component = np.array(component)
         component = array_to_spectrogram_shape(component)
 
-        pca_i = spectrogram_operations.log_power_to_stft(component)
+        pca_i = log_power_to_stft(component)
         pca_i_audio = librosa.istft(pca_i, hop_length=HOP_SIZE, n_fft=FRAME_SIZE)
         sf.write(folder + "component_"  + str(i) + ".wav", pca_i_audio, samplerate=SAMPLE_RATE)
 
