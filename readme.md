@@ -1,7 +1,5 @@
 # Audio Inpainting
 
-Project Background
-
 ## Background: Diffusion Models
 
 ### Lectures
@@ -17,7 +15,7 @@ Score-Based Generative Models: [Diffusion and Score-Based Models, Song](https://
 ### Papers
 
 Understanding Diffusion Models: A Unified Perspective: [Arxiv Link](https://arxiv.org/abs/2208.11970)  
-A Gian Summary on DPMs: [PDF](./A Gian Summary on DPMs.pdf)  
+A Gian Summary on DPMs: [PDF](/literature/gian_summary_on_DPMs.pdf)  
 Denoising Diffusion Probablistic Models: [Arxiv Link](https://arxiv.org/abs/2006.11239)  
 Imagen, Photorealistic Text-to-Image Synthesis: [Arxiv Link](https://arxiv.org/abs/2205.11487)  
 High-Resolution Image Synthesis with Latent Diffusion Models: [Arxiv Link](https://arxiv.org/abs/2112.10752)
