@@ -2,6 +2,7 @@ import joblib
 import numpy as np
 from . import spectrogram_operations, config_env
 import os
+import struct
 
 #STFT and basis parameterizations
 repo_root = os.path.abspath(os.path.join(__file__, "../.."))
@@ -26,7 +27,7 @@ def linearCombination(num_components, weights, bases, average_loudness=0):
     lc = lc + average_loudness #add the average loudness of the segment, if not specified assume 0
     return lc
     
-def recompose_spectrogram(song, plot_spectrogram=True):
+def recompose_spectrogram(song, plot_spectrogram=True, saveBinary=False, binaryFileName="BinaryCompressedAudio.bin"):
     try:
         model = joblib.load(repo_root + '/models/pca_model_nc' + str(NUM_COMPONENTS) #load current model
                             + '_fs' + str(FRAME_SIZE) 
@@ -47,9 +48,23 @@ def recompose_spectrogram(song, plot_spectrogram=True):
     scaled_segments, loudnesses = spectrogram_operations.normalize(segmented_spectrogram)
 
     # calculate projections onto bases
+    if(saveBinary):
+        f = open(repo_root + "/BinarizedReconstructions/" + binaryFileName, "wb")
+
+
     segmentProjections = []
     for scaled_segment in scaled_segments:
-        segmentProjections.append(projection(NUM_COMPONENTS, scaled_segment, components))
+        projectionOnBases = projection(NUM_COMPONENTS, scaled_segment, components)
+        segmentProjections.append(projectionOnBases)
+
+        if(saveBinary):
+            for basisProjection in projectionOnBases:
+                binarizedFloat = struct.pack('!f', basisProjection)
+                f.write(binarizedFloat)
+
+    if(saveBinary):
+        f.close()
+    
 
     # compute linear combination of projections, adding back the loudness
     reconstructed = []

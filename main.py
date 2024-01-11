@@ -26,7 +26,7 @@ spectrogram_operations.plot_pca_bases()
 
 
 #load resource and obtain log power spectrum
-file = repo_root + "/Resources/audiofile.wav"
+file = repo_root + "/Resources/cdl.wav"
 songname = file.split("/")[-1].split(".")[0]
 song, _ = librosa.load(file)
 

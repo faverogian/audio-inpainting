@@ -35,6 +35,7 @@ def plot_spectrogram(Y, sr, hop_length, title, y_axis="log"):
     plt.title(title)
     plt.ylim(bottom=0)
     plt.colorbar(format="%+2.f")
+    plt.clim(-60,12)
     plt.show()
 
 def log_power_spectrogram(song):
