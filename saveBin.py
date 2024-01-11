@@ -16,7 +16,7 @@ HOP_SIZE = int(FRAME_SIZE/2)
 #Things you might want to do
 
 #load resource and obtain log power spectrum
-file = repo_root + "/Resources/viva-la-vida.wav"
+file = repo_root + "/Resources/samplesong.wav"
 songname = file.split("/")[-1].split(".")[0]
 song, _ = librosa.load(file)
 

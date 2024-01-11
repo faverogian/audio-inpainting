@@ -1,0 +1,1 @@
+Location for binary storage of projections (lossy compression)
