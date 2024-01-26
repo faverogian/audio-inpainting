@@ -82,7 +82,7 @@ def main ():
     data = load_data(load_path)
 
     # Zip the data
-    data = zip_data(data, 70)
+    data = zip_data(data, 500)
 
     # Get the statistics
     stats = get_stats(data)
