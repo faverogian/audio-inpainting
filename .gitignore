@@ -1,4 +1,4 @@
-# *.joblib
-__pycache__
+/data
+/Reconstructions
 *.wav
-*.bin
+*__pycache__

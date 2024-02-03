@@ -84,6 +84,13 @@ def normalize(segmented_spectrogram):
         scaled_segments.append(scaled_segment)
     return (scaled_segments, loudnesses)
 
+def normalize_segment(segment):
+    segment = segment.astype('float')
+    loudness = np.mean(segment)
+    scaled_segment = scale(segment, with_std=False) #keep the spread/dispersion of loudness
+    return (scaled_segment, loudness)
+
+
 def array_to_spectrogram_shape(arr):
     arr = arr.flatten()
 
@@ -111,7 +118,7 @@ def LogPowerPhase_to_ComplexSpectrogram(log_power_spectrogram, phase_spectrogram
 def plot_pca_bases(*args):#overload function
     if len(args) != 3:
         try:
-            model = joblib.load(repo_root + '/models/pca_model_nc' + str(NUM_COMPONENTS) #load current model
+            model = joblib.load(repo_root + '/models/ipca_model_nc' + str(NUM_COMPONENTS) #load current model
                             + '_fs' + str(FRAME_SIZE) 
                             + "_FPS" + str(FRAMES_PER_SEGMENT) 
                             + ".joblib")

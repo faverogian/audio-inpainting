@@ -29,7 +29,7 @@ def linearCombination(num_components, weights, bases, average_loudness=0):
     
 def recompose_spectrogram(song, plot_spectrogram=True, saveBinary=False, binaryFileName="BinaryCompressedAudio.bin"):
     try:
-        model = joblib.load(repo_root + '/models/pca_model_nc' + str(NUM_COMPONENTS) #load current model
+        model = joblib.load(repo_root + '/models/ipca_model_nc' + str(NUM_COMPONENTS) #load current model
                             + '_fs' + str(FRAME_SIZE) 
                             + "_FPS" + str(FRAMES_PER_SEGMENT) 
                             + ".joblib")
