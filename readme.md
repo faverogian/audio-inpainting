@@ -1,5 +1,7 @@
 # Audio Inpainting
 
+IN PROGRESS
+
 ## Background: Diffusion Models
 
 ### Lectures
